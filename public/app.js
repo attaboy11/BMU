@@ -10,7 +10,6 @@ const state = {
   selectedModel: null,
   selectedSubsystem: null,
   selectedSymptom: null,
-  checksForJob: [],
   jobs: [],
 };
 
@@ -21,7 +20,8 @@ const els = {
   subsystemSelect: document.getElementById('subsystemSelect'),
   symptomSelect: document.getElementById('symptomSelect'),
   notesInput: document.getElementById('notesInput'),
-  results: document.getElementById('results'),
+  runFault: document.getElementById('run-fault'),
+  faultResults: document.getElementById('fault-results'),
   partsModel: document.getElementById('partsModel'),
   partsSubsystem: document.getElementById('partsSubsystem'),
   partsSearch: document.getElementById('partsSearch'),
@@ -117,67 +117,6 @@ function renderParts() {
     .join('');
 }
 
-function renderFlow(flow) {
-  if (!flow) {
-    els.results.innerHTML = '';
-    els.results.classList.add('hidden');
-    return;
-  }
-
-  const safety = flow.safety
-    .map((id) => state.safetyNotes.find((s) => s.id === id)?.text)
-    .filter(Boolean)
-    .map((text) => `<li>${text}</li>`) 
-    .join('');
-
-  state.checksForJob = flow.checks;
-  els.jobChecks.innerHTML = flow.checks
-    .map((c) => `<label><input type="checkbox" value="${c.text}" />${c.text} <span class="muted">(${c.expected})</span></label>`)
-    .join('');
-
-  els.results.innerHTML = `
-    <div class="item">
-      <h3>Likely root causes</h3>
-      <ol>
-        ${flow.likelyCauses
-          .map((c) => `<li>${c.component} <span class="muted">${Math.round(c.probability * 100)}%</span></li>`)
-          .join('')}
-      </ol>
-    </div>
-    <div class="item">
-      <h3>Measurable checks</h3>
-      <ul>${flow.checks.map((c) => `<li>${c.text} – <span class="muted">${c.expected}</span></li>`).join('')}</ul>
-    </div>
-    <div class="item">
-      <h3>Step-by-step</h3>
-      <ol>
-        ${flow.steps
-          .map(
-            (s) => `<li><strong>${s.title}</strong><br /><span class="muted">${s.detail}</span><br />Next if pass: ${
-              s.nextOnPass ? s.nextOnPass : 'End'
-            }${s.nextOnFail ? `, if fail: ${flow.resolutions[s.nextOnFail] || s.nextOnFail}` : ''}</li>`,
-          )
-          .join('')}
-      </ol>
-    </div>
-    <div class="item">
-      <h3>Safety</h3>
-      <ul>${safety || '<li>Follow site rules</li>'}</ul>
-    </div>
-    <div class="item">
-      <button id="addToJob">Use these steps in job log</button>
-    </div>
-  `;
-  els.results.classList.remove('hidden');
-
-  document.getElementById('addToJob').onclick = () => {
-    showPanel('jobs');
-    els.jobReported.value = els.symptomSelect.options[els.symptomSelect.selectedIndex]?.text || '';
-    els.jobDiagnosis.value = flow.likelyCauses[0]?.component || '';
-    renderJobChecks(flow.checks);
-  };
-}
-
 function renderJobChecks(checks) {
   els.jobChecks.innerHTML = checks
     .map((c) => `<label><input type="checkbox" value="${c.text}" />${c.text} <span class="muted">(${c.expected})</span></label>`)
@@ -248,6 +187,99 @@ async function saveJob() {
   alert('Job saved');
 }
 
+async function runFaultAnalysis() {
+  const modelId = els.modelSelect.value;
+  const subsystemId = els.subsystemSelect.value;
+  const symptomId = els.symptomSelect.value;
+  const notes = els.notesInput.value || '';
+
+  if (!modelId || !subsystemId || !symptomId) {
+    alert('Please select a model, subsystem, and symptom first.');
+    return;
+  }
+
+  els.faultResults.classList.remove('hidden');
+  els.faultResults.textContent = 'Loading…';
+
+  const endpoint = `/api/faults?modelId=${encodeURIComponent(modelId)}&subsystemId=${encodeURIComponent(
+    subsystemId,
+  )}&symptomId=${encodeURIComponent(symptomId)}&notes=${encodeURIComponent(notes)}`;
+
+  let result;
+  try {
+    const res = await fetch(endpoint);
+    if (!res.ok) throw new Error('Request failed');
+    result = await res.json();
+  } catch (err) {
+    // Offline or endpoint not available: fall back to seeded flows
+    result = state.flows.filter(
+      (f) => (!modelId || f.modelIds.includes(modelId)) && f.subsystemId === subsystemId && f.symptomId === symptomId,
+    );
+  }
+
+  renderFaultResults(result);
+}
+
+function renderFaultResults(result) {
+  const container = els.faultResults;
+  container.innerHTML = '';
+  container.classList.remove('hidden');
+
+  if (!result || (Array.isArray(result) && result.length === 0)) {
+    container.textContent = 'No matching fault flow found.';
+    return;
+  }
+
+  const flows = Array.isArray(result) ? result : [result];
+
+  const content = flows
+    .map((flow) => {
+      const symptomText =
+        state.symptoms.find((s) => s.id === flow.symptomId)?.title || flow.symptom || 'Fault flow';
+      const safetyList = (flow.safety || [])
+        .map((s) => (typeof s === 'string' ? state.safetyNotes.find((n) => n.id === s)?.text || s : s.text || ''))
+        .filter(Boolean);
+      return `
+        <article class="item">
+          <h3>${symptomText}</h3>
+          <div>
+            <h4>Likely causes</h4>
+            <ol>
+              ${(flow.likelyCauses || [])
+                .map((c) => {
+                  const probability = c.probability != null ? ` <span class="muted">(${Math.round(c.probability * 100)}%)</span>` : '';
+                  const label = c.component || c.text || 'Cause';
+                  return `<li>${label}${probability}</li>`;
+                })
+                .join('')}
+            </ol>
+          </div>
+          <div>
+            <h4>Checks</h4>
+            <div class="checklist">
+              ${(flow.checks || [])
+                .map((c) => {
+                  const detail = c.detail || c.expected || '';
+                  return `<label><input type="checkbox" />${c.text || 'Check'}${detail ? ` <span class="muted">(${detail})</span>` : ''}</label>`;
+                })
+                .join('')}
+            </div>
+          </div>
+          ${safetyList.length
+            ? `<div><h4>Safety</h4><ul>${safetyList.map((s) => `<li>${s}</li>`).join('')}</ul></div>`
+            : ''}
+        </article>
+      `;
+    })
+    .join('');
+
+  container.innerHTML = `${content}<details class="item"><summary>Raw data</summary><pre>${JSON.stringify(
+    result,
+    null,
+    2,
+  )}</pre></details>`;
+}
+
 function bindEvents() {
   els.cards.forEach((card) => (card.onclick = () => showPanel(card.dataset.nav)));
   document.querySelectorAll('button[data-nav]').forEach((btn) => (btn.onclick = () => showPanel(btn.dataset.nav)));
@@ -265,13 +297,6 @@ function bindEvents() {
 
   els.symptomSelect.onchange = () => {
     state.selectedSymptom = els.symptomSelect.value;
-    const flow = state.flows.find(
-      (f) =>
-        (!state.selectedModel || f.modelIds.includes(state.selectedModel)) &&
-        f.subsystemId === state.selectedSubsystem &&
-        f.symptomId === state.selectedSymptom,
-    );
-    renderFlow(flow);
   };
 
   els.partsModel.onchange = () => {
@@ -282,6 +307,7 @@ function bindEvents() {
   els.partsSearch.oninput = renderParts;
 
   els.saveJob.onclick = saveJob;
+  els.runFault.onclick = runFaultAnalysis;
 }
 
 loadData();
