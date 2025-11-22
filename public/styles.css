@@ -1,0 +1,224 @@
+:root {
+  --bg: #0f172a;
+  --panel: #121a2f;
+  --card: #182338;
+  --accent: #4ade80;
+  --muted: #94a3b8;
+  --text: #e2e8f0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #0b1225 0%, #0f172a 40%, #0a0f1f 100%);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 1rem 2rem;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 0.75rem;
+  position: sticky;
+  top: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 2;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+h2 {
+  margin: 0;
+}
+
+h3 {
+  margin: 1rem 0 0.5rem;
+}
+
+.subtitle {
+  margin: 0.1rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.pill {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: transform 150ms ease, border 150ms ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+.panel {
+  background: var(--panel);
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+select,
+input,
+textarea,
+button {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  padding: 0.7rem 0.8rem;
+  font-size: 1rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  color: #0b1225;
+  transition: transform 100ms ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+button.ghost {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--text);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.item {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.75rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.badge {
+  display: inline-flex;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.results {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.stack {
+  margin-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.75rem;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.checklist label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+}
+
+.checklist input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (min-width: 900px) {
+  body {
+    padding: 0 2rem 3rem;
+  }
+
+  .panel {
+    padding: 1.25rem 1.5rem;
+  }
+}
