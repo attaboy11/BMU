@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BMU Fault Finder</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>BMU Fault Finder</h1>
+        <p class="subtitle">On-site triage for façade access teams</p>
+      </div>
+      <div class="pill">Offline-ready</div>
+    </header>
+
+    <main>
+      <section class="card-grid" id="home">
+        <div class="card" data-nav="fault">
+          <h2>New Fault</h2>
+          <p>Run the wizard to isolate faults step-by-step.</p>
+        </div>
+        <div class="card" data-nav="parts">
+          <h2>Search Parts</h2>
+          <p>Find part numbers, locations and replacement tips.</p>
+        </div>
+        <div class="card" data-nav="jobs">
+          <h2>Recent Jobs</h2>
+          <p>View saved notes and export summaries.</p>
+        </div>
+      </section>
+
+      <section id="fault" class="panel hidden">
+        <div class="panel-header">
+          <button class="ghost" data-nav="home">← Back</button>
+          <div>
+            <h2>New Fault</h2>
+            <p class="subtitle">Model → subsystem → symptom</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="modelSelect">BMU model</label>
+            <select id="modelSelect"></select>
+          </div>
+          <div class="field">
+            <label for="subsystemSelect">Subsystem</label>
+            <select id="subsystemSelect"></select>
+          </div>
+          <div class="field">
+            <label for="symptomSelect">Symptom</label>
+            <select id="symptomSelect"></select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="notesInput">Free-text symptom (optional)</label>
+          <textarea id="notesInput" rows="2" placeholder="e.g. trolley stops mid-span, inverter flashing 04"></textarea>
+        </div>
+
+        <button id="run-fault">Run fault analysis</button>
+
+        <div id="fault-results" class="results hidden"></div>
+      </section>
+
+      <section id="parts" class="panel hidden">
+        <div class="panel-header">
+          <button class="ghost" data-nav="home">← Back</button>
+          <div>
+            <h2>Parts library</h2>
+            <p class="subtitle">Filter by model, subsystem or search term</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="partsModel">BMU model</label>
+            <select id="partsModel"></select>
+          </div>
+          <div class="field">
+            <label for="partsSubsystem">Subsystem</label>
+            <select id="partsSubsystem"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="partsSearch">Search</label>
+          <input id="partsSearch" type="search" placeholder="part name, number or location" />
+        </div>
+        <div id="partsList" class="list"></div>
+      </section>
+
+      <section id="jobs" class="panel hidden">
+        <div class="panel-header">
+          <button class="ghost" data-nav="home">← Back</button>
+          <div>
+            <h2>Job notes</h2>
+            <p class="subtitle">Capture callouts and export</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="jobSite">Site</label>
+            <input id="jobSite" type="text" placeholder="e.g. Harbor Tower" />
+          </div>
+          <div class="field">
+            <label for="jobBmu">BMU ID</label>
+            <input id="jobBmu" type="text" placeholder="e.g. A1 trolley" />
+          </div>
+          <div class="field">
+            <label for="jobDate">Date/time</label>
+            <input id="jobDate" type="datetime-local" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="jobReported">Reported symptom</label>
+          <input id="jobReported" type="text" placeholder="e.g. trolley dead from level 12" />
+        </div>
+        <div class="field">
+          <label>Checks performed</label>
+          <div id="jobChecks" class="checklist"></div>
+        </div>
+        <div class="field">
+          <label for="jobDiagnosis">Diagnosis</label>
+          <textarea id="jobDiagnosis" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label for="jobParts">Parts needed</label>
+          <textarea id="jobParts" rows="2" placeholder="e.g. ALM-CTL-TRV-10 travel contactor"></textarea>
+        </div>
+        <button id="saveJob">Save job</button>
+
+        <h3 class="stack">Recent jobs</h3>
+        <div id="jobsList" class="list"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/data.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
