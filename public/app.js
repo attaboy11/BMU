@@ -66,6 +66,7 @@ async function loadData() {
   renderModelSelects();
   renderPartsFilters();
   renderJobs();
+  renderParts();
 }
 
 function renderModelSelects() {
