@@ -1,0 +1,14 @@
+{
+  "name": "bmu-fault-finder",
+  "version": "1.0.0",
+  "description": "Offline-friendly BMU troubleshooting helper",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["bmu", "troubleshooting", "offline", "field"],
+  "author": "",
+  "license": "MIT"
+}
